@@ -38,10 +38,11 @@ public class UpdatedSuccessors implements JoinFunction
   public TripleWithCandidates join(TripleWithCandidates tripleWithCandidates,
     TripleWithDeletions tripleWithDeletions) throws Exception {
     if (tripleWithDeletions != null) {
-      tripleWithCandidates.setPredecessorQueryCandidates(removeEach(
+      if (removeEach(
         tripleWithCandidates.getPredecessorQueryCandidates(),
-        tripleWithDeletions.getDeletions()
-      ));
+        tripleWithDeletions.getDeletions())) {
+        tripleWithCandidates.isUpdated(true);
+      }
     }
     return tripleWithCandidates;
   }

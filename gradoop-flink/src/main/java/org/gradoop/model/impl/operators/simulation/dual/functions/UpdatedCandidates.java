@@ -42,6 +42,7 @@ public class UpdatedCandidates implements JoinFunction
       tripleWithCandidates.getQueryCandidates()
         .removeAll(tripleWithDeletions.getDeletions());
     }
+    tripleWithCandidates.isUpdated(false);
     return tripleWithCandidates;
   }
 }

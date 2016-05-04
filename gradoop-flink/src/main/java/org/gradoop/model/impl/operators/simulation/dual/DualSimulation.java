@@ -14,13 +14,13 @@ import org.gradoop.model.impl.functions.epgm.Id;
 import org.gradoop.model.impl.functions.epgm.SourceId;
 import org.gradoop.model.impl.functions.join.RightSide;
 import org.gradoop.model.impl.id.GradoopId;
-import org.gradoop.model.impl.operators.simulation.dual.functions.*;
 import org.gradoop.model.impl.operators.simulation.common.functions.MatchingEdges;
 import org.gradoop.model.impl.operators.simulation.common.functions.MatchingPairs;
 import org.gradoop.model.impl.operators.simulation.common.functions.MatchingTriples;
 import org.gradoop.model.impl.operators.simulation.common.functions.MatchingVertices;
 import org.gradoop.model.impl.operators.simulation.common.tuples.MatchingPair;
 import org.gradoop.model.impl.operators.simulation.common.tuples.MatchingTriple;
+import org.gradoop.model.impl.operators.simulation.dual.functions.*;
 import org.gradoop.model.impl.operators.simulation.dual.tuples.TripleWithCandidates;
 import org.gradoop.model.impl.operators.simulation.dual.tuples.TripleWithDeletions;
 import org.gradoop.model.impl.operators.simulation.dual.tuples.TripleWithPredCandidates;
@@ -103,7 +103,7 @@ public class DualSimulation
 
     // ITERATION HEAD
     IterativeDataSet<TripleWithCandidates> workingSet =
-      triplesWithCandidates.iterate(5);
+      triplesWithCandidates.iterate(Integer.MAX_VALUE);
 
     // ITERATION BODY
 
@@ -129,8 +129,13 @@ public class DualSimulation
       .where(1).equalTo(2) // sourceVertexId == targetVertexId
       .with(new UpdatedSuccessors());
 
+    // build convergence criterion
+    DataSet<TripleWithCandidates> convergence = nextWorkingSet
+            .filter(new UpdatedTriples());
+
     // ITERATION FOOTER
-    DataSet<TripleWithCandidates> result = workingSet.closeWith(nextWorkingSet, deletions);
+    DataSet<TripleWithCandidates> result = workingSet
+            .closeWith(nextWorkingSet, convergence);
 
     //--------------------------------------------------------------------------
     // Post-processing (build maximum match graph)

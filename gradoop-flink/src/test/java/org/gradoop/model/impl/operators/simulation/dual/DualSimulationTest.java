@@ -15,7 +15,7 @@ import org.s1ck.gdl.model.Vertex;
 public class DualSimulationTest extends GradoopFlinkTestBase {
 
   @Test
-  public void testVertexLabeledNonMultigraph() throws Exception {
+  public void testVertexLabeledMultigraph() throws Exception {
     FlinkAsciiGraphLoader<GraphHeadPojo, VertexPojo, EdgePojo> loader =
       getLoaderFromString(TestData.VERTEX_LABELED_MULTIGRAPH);
 

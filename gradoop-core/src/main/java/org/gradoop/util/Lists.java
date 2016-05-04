@@ -22,10 +22,13 @@ public class Lists {
    * @param <E> element type
    * @return list with remaining elements
    */
-  public static <E> List<E> removeEach(List<E> list, List<E> deletions) {
+  public static <E> boolean removeEach(List<E> list, List<E> deletions) {
+    boolean changed = false;
     for (E deletion : deletions) {
-      list.remove(deletion);
+      if(list.remove(deletion)) {
+        changed = true;
+      }
     }
-    return list;
+    return changed;
   }
 }
