@@ -5,10 +5,6 @@ import org.apache.flink.api.java.functions.FunctionAnnotation;
 import org.gradoop.model.impl.operators.simulation.dual.tuples.TripleWithCandidates;
 import org.gradoop.model.impl.operators.simulation.dual.tuples.TripleWithDeletions;
 
-
-
-import java.util.List;
-
 /**
  * Removes the deleted candidates from the candidates.
  *

@@ -5,6 +5,7 @@ import com.google.common.base.Strings;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.operators.IterativeDataSet;
 import org.apache.flink.api.java.tuple.Tuple1;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.gradoop.model.api.EPGMEdge;
 import org.gradoop.model.api.EPGMGraphHead;
 import org.gradoop.model.api.EPGMVertex;
@@ -14,12 +15,14 @@ import org.gradoop.model.impl.functions.epgm.Id;
 import org.gradoop.model.impl.functions.epgm.SourceId;
 import org.gradoop.model.impl.functions.join.RightSide;
 import org.gradoop.model.impl.id.GradoopId;
+import org.gradoop.model.impl.operators.simulation.common.debug.GradoopIdToDebugId;
 import org.gradoop.model.impl.operators.simulation.common.functions.MatchingEdges;
 import org.gradoop.model.impl.operators.simulation.common.functions.MatchingPairs;
 import org.gradoop.model.impl.operators.simulation.common.functions.MatchingTriples;
 import org.gradoop.model.impl.operators.simulation.common.functions.MatchingVertices;
 import org.gradoop.model.impl.operators.simulation.common.tuples.MatchingPair;
 import org.gradoop.model.impl.operators.simulation.common.tuples.MatchingTriple;
+import org.gradoop.model.impl.operators.simulation.dual.debug.DebugTripleWithCandidates;
 import org.gradoop.model.impl.operators.simulation.dual.functions.*;
 import org.gradoop.model.impl.operators.simulation.dual.tuples.TripleWithCandidates;
 import org.gradoop.model.impl.operators.simulation.dual.tuples.TripleWithDeletions;
@@ -101,6 +104,16 @@ public class DualSimulation
       .groupBy(0, 2)
       .reduceGroup(new GroupedTriplesWithCandidates());
 
+//    try {
+//      triplesWithCandidates
+//        .map(new DebugTripleWithCandidates())
+//        .withBroadcastSet(vertexMapping, DebugTripleWithCandidates.VERTEX_MAPPING)
+//        .withBroadcastSet(edgeMapping, DebugTripleWithCandidates.EDGE_MAPPING)
+//        .print();
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
+
     // ITERATION HEAD
     IterativeDataSet<TripleWithCandidates> workingSet =
       triplesWithCandidates.iterate(Integer.MAX_VALUE);
@@ -129,13 +142,9 @@ public class DualSimulation
       .where(1).equalTo(2) // sourceVertexId == targetVertexId
       .with(new UpdatedSuccessors());
 
-    // build convergence criterion
-    DataSet<TripleWithCandidates> convergence = nextWorkingSet
-            .filter(new UpdatedTriples());
-
     // ITERATION FOOTER
     DataSet<TripleWithCandidates> result = workingSet
-            .closeWith(nextWorkingSet, convergence);
+            .closeWith(nextWorkingSet, deletions);
 
     //--------------------------------------------------------------------------
     // Post-processing (build maximum match graph)

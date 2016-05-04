@@ -54,13 +54,13 @@ public class MatchingPairs<V extends EPGMVertex, E extends EPGMEdge> extends
       if (queryEdges != null) {
         for (Edge queryEdge : queryEdges) {
           boolean match = match(sourceVertex, queryVertex) && match(edge, queryEdge);
-          System.out.println(String.format(
-            "(%d:%s)-[%2d:%s]->() == (%d:%s)-[%2d:%s]->() => %s",
-            sourceVertex.getPropertyValue("id").getInt(), sourceVertex.getLabel(),
-            edge.getPropertyValue("id").getInt(), edge.getLabel(),
-            queryVertex.getId(), queryVertex.getLabel(),
-            queryEdge.getId(), queryEdge.getLabel(),
-            match));
+//          System.out.println(String.format(
+//            "(%d:%s)-[%2d:%s]->() == (%d:%s)-[%2d:%s]->() => %s",
+//            sourceVertex.getPropertyValue("id").getInt(), sourceVertex.getLabel(),
+//            edge.getPropertyValue("id").getInt(), edge.getLabel(),
+//            queryVertex.getId(), queryVertex.getLabel(),
+//            queryEdge.getId(), queryEdge.getLabel(),
+//            match));
           if (match) {
             reuseTuple.setVertex(sourceVertex);
             reuseTuple.setEdge(edge);

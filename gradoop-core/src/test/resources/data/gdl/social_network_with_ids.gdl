@@ -1,0 +1,44 @@
+// all vertices
+(databases:Tag {id=6, name = "Databases"})
+(graphs:Tag {id=7, name = "Graphs"})
+(hadoop:Tag {id=8, name = "Hadoop"})
+(gdbs:Forum {id=9, title = "Graph Databases"})
+(gps:Forum {id=10, title = "Graph Processing"})
+(alice:Person {id=0, name = "Alice", gender = "f", city = "Leipzig", age = 20})
+(bob:Person {id=1, name = "Bob", gender = "m", city = "Leipzig", age = 30})
+(carol:Person {id=2, name = "Carol", gender = "f", city = "Dresden", age = 30})
+(dave:Person {id=3, name = "Dave", gender = "m", city = "Dresden", age = 40})
+(eve:Person {id=4, name = "Eve", gender = "f", city = "Dresden", speaks = "English", age = 35})
+(frank:Person {id=5, name = "Frank", gender = "m", city = "Berlin", locIP = "127.0.0.1", age = 35})
+
+// edges outside logical graphs
+(eve)-[:hasInterest {id=9}]->(databases)
+(alice)-[:hasInterest {id=8}]->(databases)
+(frank)-[:hasInterest {id=10}]->(hadoop)
+(dave)-[:hasInterest {id=9}]->(hadoop)
+(gdbs)-[:hasModerator {id=15}]->(alice)
+(gdbs)-[:hasMember {id=17}]->(alice)
+(gdbs)-[:hasMember {id=18}]->(bob)
+
+(databases)<-[ghtd:hasTag {id=11}]-(gdbs)-[ghtg1:hasTag {id=12}]->(graphs)<-[ghtg2:hasTag {id=13}]-(gps)-[ghth:hasTag {id=14}]->(hadoop)
+
+// logical graphs
+g0:Community {interest = "Databases", vertexCount = 3} [
+    (eve)-[eka:knows {id=6, since = 2013}]->(alice)-[akb:knows {id=0, since = 2014}]->(bob)
+    (eve)-[ekb:knows {id=21, since = 2015}]->(bob)-[bka:knows {id=1, since = 2014}]->(alice)
+]
+g1:Community {interest = "Hadoop", vertexCount = 3} [
+    (frank)-[fkc:knows {id=22, since = 2015}]->(carol)-[ckd:knows {id=4, since = 2014}]->(dave)
+    (frank)-[fkd:knows {id=23, since = 2015}]->(dave)-[dkc:knows {id=5, since = 2014}]->(carol)
+]
+g2:Community {interest = "Graphs", vertexCount = 4} [
+    (alice)-[akb]->(bob)-[bkc:knows {id=2, since = 2013}]->(carol)-[ckd]->(dave)
+    (alice)<-[bka]-(bob)<-[ckb:knows {id=3, since = 2013}]-(carol)<-[dkc]-(dave)
+]
+g3:Forum [
+    (gps)-[:hasModerator {id=16, since = 2013}]->(dave)
+    (gps)-[:hasMember {id=20}]->(dave)
+    (gps)-[:hasMember {id=19}]->(carol)-[ckd]->(dave)
+]
+
+

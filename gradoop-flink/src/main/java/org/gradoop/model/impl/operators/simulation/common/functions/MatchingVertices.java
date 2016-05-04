@@ -23,10 +23,10 @@ public class MatchingVertices<V extends EPGMVertex>
   @Override
   public boolean filter(V v) throws Exception {
     boolean match = EntityMatcher.match(v, getQueryHandler().getVertices());
-    System.out.println(String.format("(%d:%s) => %s",
-      v.getPropertyValue("id").getInt(),
-      v.getLabel(),
-      match));
+//    System.out.println(String.format("(%d:%s) => %s",
+//      v.getPropertyValue("id").getInt(),
+//      v.getLabel(),
+//      match));
     return match;
   }
 }

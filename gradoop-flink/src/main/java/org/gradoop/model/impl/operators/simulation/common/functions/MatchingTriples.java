@@ -63,17 +63,17 @@ public class MatchingTriples<V extends EPGMVertex, E extends EPGMEdge>
             && EntityMatcher.match(matchingPair.getEdge(), queryEdge)
             && EntityMatcher.match(targetVertex, queryTargetVertex);
 
-          System.out.println(String.format(
-            "(%d:%s)-[%2d:%s]->(%d:%s) == (%d:%s)-[%2d:%s]->(%d:%s) => %s",
-            matchingPair.getVertex().getPropertyValue("id").getInt(),
-            matchingPair.getVertex().getLabel(),
-            matchingPair.getEdge().getPropertyValue("id").getInt(),
-            matchingPair.getEdge().getLabel(),
-            targetVertex.getPropertyValue("id").getInt(),
-            targetVertex.getLabel(),
-            querySourceVertex.getId(), querySourceVertex.getLabel(),
-            queryEdge.getId(), queryEdge.getLabel(),
-            queryTargetVertex.getId(), queryTargetVertex.getLabel(), match));
+//          System.out.println(String.format(
+//            "(%d:%s)-[%2d:%s]->(%d:%s) == (%d:%s)-[%2d:%s]->(%d:%s) => %s",
+//            matchingPair.getVertex().getPropertyValue("id").getInt(),
+//            matchingPair.getVertex().getLabel(),
+//            matchingPair.getEdge().getPropertyValue("id").getInt(),
+//            matchingPair.getEdge().getLabel(),
+//            targetVertex.getPropertyValue("id").getInt(),
+//            targetVertex.getLabel(),
+//            querySourceVertex.getId(), querySourceVertex.getLabel(),
+//            queryEdge.getId(), queryEdge.getLabel(),
+//            queryTargetVertex.getId(), queryTargetVertex.getLabel(), match));
 
           if(match) {
             candidates.add(queryEdge.getId());

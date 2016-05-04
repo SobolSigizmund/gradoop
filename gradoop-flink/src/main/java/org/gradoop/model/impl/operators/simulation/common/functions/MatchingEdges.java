@@ -18,10 +18,10 @@ public class MatchingEdges<E extends EPGMEdge>
   @Override
   public boolean filter(E e) throws Exception {
     boolean match = EntityMatcher.match(e, getQueryHandler().getEdges());
-    System.out.println(String.format("[%d:%s] => %s",
-      e.getPropertyValue("id").getInt(),
-      e.getLabel(),
-      match));
+//    System.out.println(String.format("[%d:%s] => %s",
+//      e.getPropertyValue("id").getInt(),
+//      e.getLabel(),
+//      match));
     return match;
   }
 }
