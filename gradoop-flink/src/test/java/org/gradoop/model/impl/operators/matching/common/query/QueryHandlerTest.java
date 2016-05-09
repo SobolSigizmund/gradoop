@@ -31,6 +31,16 @@ public class QueryHandlerTest {
   static QueryHandler QUERY_HANDLER = QueryHandler.fromString(TEST_QUERY);
 
   @Test
+  public void testGetDiameter() {
+    assertEquals(2, QUERY_HANDLER.getDiameter());
+  }
+
+  @Test
+  public void testGetRadius() {
+    assertEquals(1, QUERY_HANDLER.getRadius());
+  }
+
+  @Test
   public void testGetVertexById() throws Exception {
     Vertex expected = GDL_HANDLER.getVertexCache().get("v1");
     assertTrue(QUERY_HANDLER.getVertexById(expected.getId()).equals(expected));
@@ -129,6 +139,15 @@ public class QueryHandlerTest {
     List<Edge> expected = Lists.newArrayList(
       GDL_HANDLER.getEdgeCache().get("e4"));
     assertTrue(elementsEqual(successors, expected));
+  }
+
+  @Test
+  public void testGetCentralVertices() throws Exception {
+    List<Vertex> centralVertices = Lists.newArrayList(
+      QUERY_HANDLER.getCentralVertices());
+    List<Vertex> expected = Lists.newArrayList(
+      GDL_HANDLER.getVertexCache().get("v2"));
+    assertTrue(elementsEqual(centralVertices, expected));
   }
 
   private static <EL extends Element>

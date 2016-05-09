@@ -9,6 +9,7 @@ import org.s1ck.gdl.model.GraphElement;
 import org.s1ck.gdl.model.Vertex;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,14 @@ public class QueryHandler {
    */
   private final GDLHandler gdlHandler;
 
+  /**
+   * Graph diameter
+   */
+  private Integer diameter;
+  /**
+   * Graph radius
+   */
+  private Integer radius;
   /**
    * Cache: vId --> Vertex with Id == vId
    */
@@ -85,6 +94,30 @@ public class QueryHandler {
    */
   public Collection<Edge> getEdges() {
     return gdlHandler.getEdges();
+  }
+
+  /**
+   * Returns the diameter of the query graph.
+   *
+   * @return diameter
+   */
+  public int getDiameter() {
+    if (diameter == null) {
+      diameter = GraphMetrics.getDiameter(this);
+    }
+    return diameter;
+  }
+
+  /**
+   * Returns the radius of the query graph.
+   *
+   * @return radius
+   */
+  public int getRadius() {
+    if (radius == null) {
+      radius = GraphMetrics.getRadius(this);
+    }
+    return radius;
   }
 
   /**
@@ -268,6 +301,36 @@ public class QueryHandler {
       ids.add(el.getId());
     }
     return ids;
+  }
+
+  /**
+   * Returns all vertices that have a minimum eccentricity.
+   *
+   * @return central vertices
+   */
+  public Collection<Vertex> getCentralVertices() {
+    List<Vertex> result = Lists.newArrayList();
+    for (Long vId : getCentralVertexIds()) {
+      result.add(getVertexById(vId));
+    }
+    return result;
+  }
+
+  /**
+   * Returns all vertex ids that have a minimum eccentricity.
+   *
+   * @return vertex identifiers
+   */
+  public Collection<Long> getCentralVertexIds() {
+    Map<Long, Integer> eccMap = GraphMetrics.getEccentricity(this);
+    Integer min = Collections.min(eccMap.values());
+    List<Long> result = Lists.newArrayList();
+    for (Map.Entry<Long, Integer> eccEntry : eccMap.entrySet()) {
+      if (eccEntry.getValue().equals(min)) {
+        result.add(eccEntry.getKey());
+      }
+    }
+    return result;
   }
 
   /**
