@@ -7,7 +7,7 @@ import org.apache.flink.util.Collector;
 import org.gradoop.model.api.EPGMEdge;
 import org.gradoop.model.api.EPGMVertex;
 import org.gradoop.model.impl.operators.matching.common.matching.EntityMatcher;
-import org.gradoop.model.impl.operators.matching.common.QueryHandler;
+import org.gradoop.model.impl.operators.matching.common.query.QueryHandler;
 import org.gradoop.model.impl.operators.matching.common.tuples.MatchingTriple;
 import org.gradoop.model.impl.operators.matching.common.tuples.MatchingPair;
 import org.s1ck.gdl.model.Edge;

@@ -3,7 +3,7 @@ package org.gradoop.model.impl.operators.matching.common.functions;
 import org.apache.flink.api.common.functions.RichFilterFunction;
 import org.apache.flink.configuration.Configuration;
 import org.gradoop.model.api.EPGMElement;
-import org.gradoop.model.impl.operators.matching.common.QueryHandler;
+import org.gradoop.model.impl.operators.matching.common.query.QueryHandler;
 
 public abstract class MatchingElements
   <EL1 extends EPGMElement>
