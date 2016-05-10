@@ -142,12 +142,12 @@ public class QueryHandlerTest {
   }
 
   @Test
-  public void testGetCentralVertices() throws Exception {
-    List<Vertex> centralVertices = Lists.newArrayList(
-      QUERY_HANDLER.getCentralVertices());
+  public void testGetCenterVertices() throws Exception {
+    List<Vertex> centerVertices = Lists.newArrayList(
+      QUERY_HANDLER.getCenterVertices());
     List<Vertex> expected = Lists.newArrayList(
       GDL_HANDLER.getVertexCache().get("v2"));
-    assertTrue(elementsEqual(centralVertices, expected));
+    assertTrue(elementsEqual(centerVertices, expected));
   }
 
   private static <EL extends Element>

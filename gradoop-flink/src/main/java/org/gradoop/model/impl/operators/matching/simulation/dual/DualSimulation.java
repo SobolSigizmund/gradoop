@@ -4,22 +4,37 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.operators.IterativeDataSet;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.gradoop.model.api.EPGMEdge;
 import org.gradoop.model.api.EPGMGraphHead;
 import org.gradoop.model.api.EPGMVertex;
 import org.gradoop.model.api.operators.UnaryGraphToGraphOperator;
 import org.gradoop.model.impl.LogicalGraph;
+import org.gradoop.model.impl.id.GradoopId;
 import org.gradoop.model.impl.operators.matching.common.PostProcessor;
 import org.gradoop.model.impl.operators.matching.common.PreProcessor;
+import org.gradoop.model.impl.operators.matching.common.debug.GradoopIdToDebugId;
+import org.gradoop.model.impl.operators.matching.common.debug.Printer;
 import org.gradoop.model.impl.operators.matching.common.tuples.MatchingTriple;
+import org.gradoop.model.impl.operators.matching.simulation.dual.debug.PrintTripleWithCandidates;
+import org.gradoop.model.impl.operators.matching.simulation.dual.debug.PrintTripleWithDeletions;
 import org.gradoop.model.impl.operators.matching.simulation.dual.functions.*;
 import org.gradoop.model.impl.operators.matching.simulation.dual.tuples.TripleWithCandidates;
 import org.gradoop.model.impl.operators.matching.simulation.dual.tuples.TripleWithDeletions;
 import org.gradoop.model.impl.operators.matching.simulation.dual.tuples.TripleWithPredCandidates;
 
+/**
+ * Dual-Simulation.
+ *
+ * @param <G> EPGM graph head type
+ * @param <V> EPGM vertex type
+ * @param <E> EPGM edge type
+ */
 public class DualSimulation
   <G extends EPGMGraphHead, V extends EPGMVertex, E extends EPGMEdge>
   implements UnaryGraphToGraphOperator<G, V, E> {
+
+  static boolean debug = true;
 
   /**
    * GDL based query string
@@ -31,6 +46,8 @@ public class DualSimulation
    * attached.
    */
   private final boolean attachData;
+  private DataSet<Tuple2<GradoopId, Integer>> vertexMapping;
+  private DataSet<Tuple2<GradoopId, Integer>> edgeMapping;
 
   /**
    * Creates a new operator instance.
@@ -60,13 +77,18 @@ public class DualSimulation
   @Override
   public LogicalGraph<G, V, E> execute(LogicalGraph<G, V, E> graph) {
 
+    if (debug) {
+      vertexMapping = graph.getVertices().map(new GradoopIdToDebugId<V>("id"));
+      edgeMapping = graph.getEdges().map(new GradoopIdToDebugId<E>("id"));
+    }
+
     //--------------------------------------------------------------------------
     // Pre-processing (filter candidates)
     //--------------------------------------------------------------------------
 
     // TODO: the following is only necessary if diameter(query) > 0
 
-    final DataSet<MatchingTriple> triples = preProcess(graph);
+    DataSet<MatchingTriple> triples = preProcess(graph);
 
     //--------------------------------------------------------------------------
     // Dual Simulation
@@ -74,10 +96,23 @@ public class DualSimulation
 
     // TODO: the following is only necessary if diameter(query) > 1
 
-    final DataSet<TripleWithCandidates> triplesWithCandidates =
+    DataSet<TripleWithCandidates> triplesWithCandidates =
       getTriplesWithCandidates(triples);
 
+    if (debug) {
+      triplesWithCandidates = triplesWithCandidates
+        .map(new PrintTripleWithCandidates())
+        .withBroadcastSet(vertexMapping, Printer.VERTEX_MAPPING)
+        .withBroadcastSet(edgeMapping, Printer.EDGE_MAPPING);
+    }
+
     DataSet<TripleWithCandidates> result = simulate(triplesWithCandidates);
+
+    if (debug) {
+      result = result.map(new PrintTripleWithCandidates())
+        .withBroadcastSet(vertexMapping, Printer.VERTEX_MAPPING)
+        .withBroadcastSet(edgeMapping, Printer.EDGE_MAPPING);
+    }
 
     //--------------------------------------------------------------------------
     // Post-processing (build maximum match graph)
@@ -95,8 +130,7 @@ public class DualSimulation
    */
   protected DataSet<MatchingTriple> preProcess(LogicalGraph<G, V, E> graph) {
     // filter vertex-edge-vertex triples by query predicates
-    return PreProcessor
-      .filterTriplets(graph, query);
+    return PreProcessor.filterTriplets(graph, query);
   }
 
   /**
@@ -148,6 +182,13 @@ public class DualSimulation
       .filter(new UpdatedTriples())
       .flatMap(new TriplesWithDeletions(query));
 
+    if (debug) {
+      deletions = deletions
+        .map(new PrintTripleWithDeletions(true))
+        .withBroadcastSet(vertexMapping, PrintTripleWithCandidates.VERTEX_MAPPING)
+        .withBroadcastSet(edgeMapping, PrintTripleWithCandidates.EDGE_MAPPING);
+    }
+
     // build next working set
     DataSet<TripleWithCandidates> nextWorkingSet = workingSet
       // update candidates
@@ -164,6 +205,13 @@ public class DualSimulation
       .leftOuterJoin(deletions)
       .where(1).equalTo(2) // sourceVertexId == targetVertexId
       .with(new UpdatedSuccessors());
+
+    if (debug) {
+      nextWorkingSet = nextWorkingSet
+        .map(new PrintTripleWithCandidates(true))
+        .withBroadcastSet(vertexMapping, PrintTripleWithCandidates.VERTEX_MAPPING)
+        .withBroadcastSet(edgeMapping, PrintTripleWithCandidates.EDGE_MAPPING);
+    }
 
     // ITERATION FOOTER
     return workingSet

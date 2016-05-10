@@ -57,11 +57,12 @@ public class MatchingTriples<V extends EPGMVertex, E extends EPGMEdge>
         .getEdgesByTargetVertexId(queryTargetVertex.getId());
       if (edges != null) {
         for (Edge queryEdge : edges) {
-          Vertex querySourceVertex = queryHandler.getVertexById(queryEdge.getSourceVertexId());
-          boolean match = EntityMatcher
-            .match(matchingPair.getVertex(), querySourceVertex)
-            && EntityMatcher.match(matchingPair.getEdge(), queryEdge)
-            && EntityMatcher.match(targetVertex, queryTargetVertex);
+          Vertex querySourceVertex = queryHandler
+            .getVertexById(queryEdge.getSourceVertexId());
+          boolean match =
+            EntityMatcher.match(matchingPair.getVertex(), querySourceVertex) &&
+              EntityMatcher.match(matchingPair.getEdge(), queryEdge) &&
+              EntityMatcher.match(targetVertex, queryTargetVertex);
 
 //          System.out.println(String.format(
 //            "(%d:%s)-[%2d:%s]->(%d:%s) == (%d:%s)-[%2d:%s]->(%d:%s) => %s",
@@ -75,19 +76,19 @@ public class MatchingTriples<V extends EPGMVertex, E extends EPGMEdge>
 //            queryEdge.getId(), queryEdge.getLabel(),
 //            queryTargetVertex.getId(), queryTargetVertex.getLabel(), match));
 
-          if(match) {
+          if (match) {
             candidates.add(queryEdge.getId());
           }
         }
       }
+    }
 
-      if (candidates.size() > 0) {
-        reuseTriple.setEdgeId(matchingPair.getEdge().getId());
-        reuseTriple.setSourceVertexId(matchingPair.getVertex().getId());
-        reuseTriple.setTargetVertexId(targetVertex.getId());
-        reuseTriple.setQueryCandidates(candidates);
-        collector.collect(reuseTriple);
-      }
+    if (candidates.size() > 0) {
+      reuseTriple.setEdgeId(matchingPair.getEdge().getId());
+      reuseTriple.setSourceVertexId(matchingPair.getVertex().getId());
+      reuseTriple.setTargetVertexId(targetVertex.getId());
+      reuseTriple.setQueryCandidates(candidates);
+      collector.collect(reuseTriple);
     }
   }
 }

@@ -306,14 +306,23 @@ public class QueryHandler {
   /**
    * Returns all vertices that have a minimum eccentricity.
    *
-   * @return central vertices
+   * @return center vertices
    */
-  public Collection<Vertex> getCentralVertices() {
+  public Collection<Vertex> getCenterVertices() {
     List<Vertex> result = Lists.newArrayList();
     for (Long vId : getCentralVertexIds()) {
       result.add(getVertexById(vId));
     }
     return result;
+  }
+
+  /**
+   * Returns a single center vertex of the query graph.
+   *
+   * @return center vertex
+   */
+  public Vertex getCenterVertex() {
+    return getCenterVertices().iterator().next();
   }
 
   /**

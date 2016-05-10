@@ -20,15 +20,15 @@ import static org.gradoop.model.impl.GradoopFlinkTestUtils.printLogicalGraph;
 public class DualSimulationTest extends GradoopFlinkTestBase {
 
   @Test
-  public void testVertexLabeledMultigraph() throws Exception {
+  public void test1() throws Exception {
     FlinkAsciiGraphLoader<GraphHeadPojo, VertexPojo, EdgePojo> loader =
-      getLoaderFromString(TestData.VERTEX_LABELED_MULTIGRAPH);
+      getLoaderFromString(TestData.LABELED_MULTIGRAPH);
 
     LogicalGraph<GraphHeadPojo, VertexPojo, EdgePojo> db =
       loader.getLogicalGraphByVariable("db");
 
     // pattern
-    String query = "(a:A)-[:a]->(b:B)-[:a]->(a);(b)-[:b]->(:C)";
+    String query = "(a:A)-[:a]->(b:B)-[:a]->(a);(b)-[:b]->(:C)<-[:a]-(:B)";
     GDLHandler gdlHandler = new GDLHandler.Builder().buildFromString(query);
     System.out.println("Pattern:");
     for (Vertex vertex : gdlHandler.getVertices()) {
@@ -40,14 +40,21 @@ public class DualSimulationTest extends GradoopFlinkTestBase {
 
     // expected result
     loader.appendToDatabaseFromString("expected[" +
-      "(v1)-[e2]->(v6)" +
-      "(v2)-[e3]->(v6)" +
-      "(v4)-[e4]->(v1)" +
-      "(v4)-[e5]->(v3)" +
-      "(v5)-[e6]->(v4)" +
+      "(v1)-[e0]->(v0)" +
+      "(v0)-[e1]->(v4)" +
+      "(v0)-[e2]->(v4)" +
+      "(v0)-[e3]->(v3)" +
+      "(v3)-[e4]->(v5)" +
+      "(v5)-[e5]->(v1)" +
+      "(v1)-[e6]->(v6)" +
       "(v6)-[e7]->(v2)" +
-      "(v6)-[e8]->(v5)" +
-      "(v6)-[e9]->(v7)" +
+      "(v2)-[e8]->(v6)" +
+      "(v5)-[e9]->(v4)" +
+      "(v5)-[e10]->(v4)" +
+      "(v6)-[e11]->(v7)" +
+      "(v8)-[e12]->(v7)" +
+      "(v10)-[e13]->(v5)" +
+      "(v6)-[e14]->(v10)" +
       "]");
 
     // create operator
@@ -60,16 +67,15 @@ public class DualSimulationTest extends GradoopFlinkTestBase {
   }
 
   @Test
-  public void testSocialNetwork() throws Exception {
-    InputStream inputStream = getClass()
-      .getResourceAsStream("/data/gdl/social_network_with_ids.gdl");
-    EPGMDatabase<GraphHeadPojo, VertexPojo, EdgePojo> database =
-      getLoaderFromStream(inputStream).getDatabase();
+  public void test2() throws Exception {
+    FlinkAsciiGraphLoader<GraphHeadPojo, VertexPojo, EdgePojo> loader =
+      getLoaderFromString(TestData.LABELED_MULTIGRAPH);
 
-    String query = "" +
-      "(a:Person {gender=\"f\"})-[:knows]->(b:Person {gender=\"m\"})" +
-      "(a)<-[:hasMember]-(f:Forum {title=\"Graph Databases\"})";
+    LogicalGraph<GraphHeadPojo, VertexPojo, EdgePojo> db =
+      loader.getLogicalGraphByVariable("db");
 
+    // pattern
+    String query = "(vq1:B)-[eq1:b]->(vq2:C)<-[eq2:a]-(vq3:A)";
     GDLHandler gdlHandler = new GDLHandler.Builder().buildFromString(query);
     System.out.println("Pattern:");
     for (Vertex vertex : gdlHandler.getVertices()) {
@@ -79,11 +85,16 @@ public class DualSimulationTest extends GradoopFlinkTestBase {
       System.out.println(edge);
     }
 
+    // expected result
+    loader.appendToDatabaseFromString("expected[" +
+      "]");
+
     // create operator
     DualSimulation<GraphHeadPojo, VertexPojo, EdgePojo> op =
       new DualSimulation<>(query);
 
-//    op.execute(database.getDatabaseGraph());
-    printLogicalGraph(op.execute(database.getDatabaseGraph()));
+    // execute and validate
+    collectAndAssertTrue(op.execute(db)
+      .equalsByElementIds(loader.getLogicalGraphByVariable("expected")));
   }
 }
